@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SGL Web Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#3B82F6',
+                            600: '#2563EB',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#0A0A14] text-slate-100 min-h-screen font-sans antialiased">
+    <div class="max-w-md mx-auto p-5">
+        <!-- Header -->
+        <div class="flex items-center space-x-3 mb-8 mt-4">
+            <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-white">SGL Generator <span class="text-brand-500 text-sm ml-1">LITE</span></h1>
+                <p class="text-xs text-slate-400">Mobile Authorization Portal</p>
+            </div>
+        </div>
+
+        <!-- Private Key Input -->
+        <div class="bg-[#121220] border border-[#25253C] rounded-2xl p-5 mb-6 shadow-sm">
+            <label class="block text-sm font-semibold text-slate-300 mb-2">Master Private Key</label>
+            <input type="password" id="privateKey" placeholder="Paste Base64 private key here..."
+                class="w-full bg-[#0A0A14] border border-[#25253C] text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors">
+            <p class="text-[11px] text-slate-500 mt-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Key is saved locally on your device only.
+            </p>
+        </div>
+
+        <!-- Generator Form -->
+        <div class="bg-[#121220] border border-[#25253C] rounded-2xl p-5 mb-6 shadow-sm">
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-300 mb-2">Authorization Type</label>
+                <select id="actionType" class="w-full bg-[#0A0A14] border border-[#25253C] text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500 appearance-none">
+                    <option value="6">Unlock Protected Search Engine</option>
+                    <option value="0">Add File Quota (Increase Slots)</option>
+                    <option value="3">Unlimited File Quota</option>
+                    <option value="2">Set Exact File Quota</option>
+                    <option value="4">Emergency Block App</option>
+                </select>
+            </div>
+
+            <div id="amountContainer" class="mb-4 hidden">
+                <label class="block text-sm font-semibold text-slate-300 mb-2">Number of Slots</label>
+                <input type="number" id="amount" value="50" class="w-full bg-[#0A0A14] border border-[#25253C] text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-slate-300 mb-2">Description / Note (Optional)</label>
+                <input type="text" id="description" placeholder="e.g. VIP Customer, Extra Slots" class="w-full bg-[#0A0A14] border border-[#25253C] text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-brand-500">
+            </div>
+
+            <button id="generateBtn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3.5 px-4 rounded-xl transition-colors shadow-lg shadow-brand-500/20 active:scale-[0.98]">
+                Generate Authorization Key
+            </button>
+        </div>
+
+        <!-- Result -->
+        <div id="resultContainer" class="hidden">
+            <h2 class="text-sm font-bold text-slate-400 mb-3 uppercase tracking-wider">Generated Code</h2>
+            <div class="bg-[#052e16] border border-[#166534] rounded-2xl p-5 relative">
+                <p id="resultCode" class="text-[#4ade80] font-mono text-center font-bold text-lg tracking-widest break-all mb-4"></p>
+                <button id="copyBtn" class="w-full bg-[#166534] hover:bg-[#15803d] text-white font-bold py-3 px-4 rounded-xl transition-colors flex justify-center items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    Copy to Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script type="module">
+        import { ed25519 } from 'https://esm.sh/@noble/curves@1.4.0/ed25519';
+
+        const Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+        // Load saved key
+        const pkInput = document.getElementById('privateKey');
+        const savedPk = localStorage.getItem('sgl_private_key');
+        if (savedPk) pkInput.value = savedPk;
+
+        pkInput.addEventListener('change', () => {
+            localStorage.setItem('sgl_private_key', pkInput.value.trim());
+        });
+
+        // UI Logic
+        const actionType = document.getElementById('actionType');
+        const amountContainer = document.getElementById('amountContainer');
+        
+        actionType.addEventListener('change', () => {
+            const val = parseInt(actionType.value);
+            // Show amount if Add (0) or SetLimit (2)
+            if (val === 0 || val === 2) {
+                amountContainer.classList.remove('hidden');
+            } else {
+                amountContainer.classList.add('hidden');
+            }
+        });
+
+        // Base32 Encoder (C# match)
+        function toBase32(data) {
+            if (!data || data.length === 0) return "";
+            let result = "";
+            let index = 0;
+            let bitPos = 0;
+
+            while (index < data.length) {
+                let currentByte = data[index];
+                let bits = 8 - bitPos;
+                let value;
+
+                if (bits > 5) {
+                    value = (currentByte >> (bits - 5)) & 0x1F;
+                    bitPos += 5;
+                } else {
+                    value = (currentByte & ((1 << bits) - 1)) << (5 - bits);
+                    bitPos = 5 - bits;
+                    index++;
+                    if (index < data.length) {
+                        value |= (data[index] >> (8 - bitPos)) & ((1 << bitPos) - 1);
+                    }
+                }
+                result += Alphabet[value];
+            }
+            return result;
+        }
+
+        function toBase64Bytes(bytes) {
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        function fromBase64(b64) {
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+        function uuidN() {
+            return crypto.randomUUID().replace(/-/g, '').toUpperCase();
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            try {
+                const b64Key = pkInput.value.trim();
+                if (!b64Key) {
+                    alert('Please enter your Master Private Key.');
+                    return;
+                }
+
+                const privateKeyBytes = fromBase64(b64Key);
+                if (privateKeyBytes.length !== 32) {
+                    alert('Invalid private key length. Expected 32 bytes.');
+                    return;
+                }
+
+                const action = parseInt(actionType.value);
+                const amount = parseInt(document.getElementById('amount').value) || 0;
+                const description = document.getElementById('description').value.trim() || null;
+
+                const command = {
+                    Version: "SGL1",
+                    CommandId: uuidN(),
+                    Action: action,
+                    Amount: (action === 0 || action === 2) ? amount : 0,
+                    Epoch: 0,
+                    CreatedUtc: new Date().toISOString(),
+                    Description: description
+                };
+
+                // Serialize payload
+                const payloadJson = JSON.stringify(command);
+                const payloadBase64 = toBase64Bytes(new TextEncoder().encode(payloadJson));
+
+                // Sign
+                const dataToSign = new TextEncoder().encode(payloadBase64);
+                const signatureBytes = ed25519.sign(dataToSign, privateKeyBytes);
+                const signatureBase64 = toBase64Bytes(signatureBytes);
+
+                // Signed Command
+                const signedCommand = {
+                    Payload: payloadBase64,
+                    Signature: signatureBase64
+                };
+
+                const signedCommandJson = JSON.stringify(signedCommand);
+                const signedCommandBytes = new TextEncoder().encode(signedCommandJson);
+                
+                // Encode to Base32
+                const base32Str = toBase32(signedCommandBytes);
+                
+                // Format with dashes every 4 chars
+                let formatted = "";
+                for (let i = 0; i < base32Str.length; i++) {
+                    if (i > 0 && i % 4 === 0) formatted += "-";
+                    formatted += base32Str[i];
+                }
+
+                document.getElementById('resultCode').innerText = formatted;
+                document.getElementById('resultContainer').classList.remove('hidden');
+
+            } catch (err) {
+                alert('Error generating key: ' + err.message);
+                console.error(err);
+            }
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const code = document.getElementById('resultCode').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const orig = btn.innerHTML;
+                btn.innerHTML = 'Copied!';
+                setTimeout(() => btn.innerHTML = orig, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
